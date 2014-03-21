@@ -14,7 +14,7 @@ clear;
 fprintf('############### Question 4 ###############\n');
 question4;
 
-clear;
+% No clear as question 5 depends on question 4!
 fprintf('############### Question 5 ###############\n');
 question5;
 

@@ -1,2 +1,1 @@
-addpath('functions');
 format shortG
