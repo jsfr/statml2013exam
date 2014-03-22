@@ -39,7 +39,7 @@
 \newcommand{\vect}[1]{\mathbf{#1}}
 \newcommand{\mat}[1]{\textbf{#1}}
 
-\renewcommand{\thesection}{\uppercase\expandafter{\romannumeral 3}.\arabic{section}}
+% \renewcommand{\thesection}{\uppercase\expandafter{\romannumeral{3}}.\arabic{section}}
 
 % Todonotes commands.
 \newcommand{\addref}{\todo[color=red!40]{Add reference.}}
@@ -47,10 +47,10 @@
 \newcommand{\missing}[1]{\todo[inline,color=green!40]{Need to write: #1}}
 
 \title{ 
-\normalfont \normalsize 
+\normalfont\normalsize 
 \textsc{University of Copenhagen} \\ [25pt]
 \horrule{0.5pt} \\[0.4cm]
-\huge StatML: Exam 2014\\
+\huge StatML\: Exam 2014\\
 \horrule{2pt} \\[0.5cm]
 }
 
@@ -67,10 +67,13 @@ Notes: we could also do regularization, and/or radial/polynomial basis functions
 Source code: question1.m linearRegression.m meanSquaredError.m
 
 \subsection*{Question 2}
-Notes: we should probably use a neural network :/
-Source code: question2.m
+Source code: question2.m, polyRegression.m, polyPredict.m, meanSquaredError.m
 
-$\sigma = \sqrt{1 / (2 \gamma)} \Leftrightarrow \gamma = 1 / (2s^2)$
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/question2}
+    \caption{Here be dragons.}\label{fig:question2}
+\end{figure}
 
 % section predicting_the_specific_star_formation_rate (end)
 
@@ -79,6 +82,8 @@ $\sigma = \sqrt{1 / (2 \gamma)} \Leftrightarrow \gamma = 1 / (2s^2)$
 
 \subsection*{Question 3}
 
+Notes: $\sigma = \sqrt{1 / (2 \gamma)} \Leftrightarrow \gamma = 1 / (2 \sigma^2)$
+
 Source code: question3.m jaakkola.m crossValidation.m
 
 \subsection*{Question 4}
@@ -86,15 +91,13 @@ Source code: question3.m jaakkola.m crossValidation.m
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/question4_1}
-    \caption{Here be dragons.}
-    \label{fig:question4_1}
+    \caption{Here be dragons.}\label{fig:question4_1}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/question4_2}
-    \caption{Here be dragons.}
-    \label{fig:question4_2}
+    \caption{Here be dragons.}\label{fig:question4_2}
 \end{figure}
 
 Source code: question4.m pca.m
@@ -104,8 +107,7 @@ Source code: question4.m pca.m
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/question5_1}
-    \caption{Here be dragons.}
-    \label{fig:question5_1}
+    \caption{Here be dragons.}\label{fig:question5_1}
 \end{figure}
 
 Source code: question5.m
