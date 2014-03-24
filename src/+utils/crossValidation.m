@@ -1,6 +1,6 @@
-function [bestParams, minError] = crossValidation(data, folds, params, libsvmpath)
+function [bestParams, minError] = crossValidation(data, folds, params, fun)
     % addpath to the libsvm toolbox
-    addpath(libsvmpath);
+    % addpath(libsvmpath);
 
     data = sortrows(data, size(data, 2));
     K = cell(folds, 1);
@@ -17,9 +17,7 @@ function [bestParams, minError] = crossValidation(data, folds, params, libsvmpat
         trainData = cell2mat({K{[1:i-1 i+1:end]}}');
 
         for r = 1:size(params, 1)
-            flags = ['-c ' num2str(params(r, 1)) ' -g ' num2str(params(r, 2)) ' -q'];
-            model = svmtrain(trainData(:,end), trainData(:,1:end-1), flags);
-            C = svmpredict(heldOut(:, end), heldOut(:, 1:end-1), model, '-q');
+            C = fun(params(r, :), trainData, heldOut);
             Sums(r) = Sums(r) + sum(heldOut(:, end) ~= C) / length(C);
         end
     end

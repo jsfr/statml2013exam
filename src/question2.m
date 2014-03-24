@@ -32,6 +32,7 @@ xlabel('degree of polynomium');
 ylabel('MSE')
 legend('Training data', 'Test data');
 set(gca,'XTick', 1:1:n);
+xlim([1 n]);
 utils.betterPlots(handle);
 print(handle, '-depsc2', '../figures/question2.eps');
 hold off;

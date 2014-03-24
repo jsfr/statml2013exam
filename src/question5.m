@@ -7,7 +7,9 @@ data = data(:, 1:end-1);
 
 [idx, centres] = kmeans(data, 2);
 
-centres % Report the centres, but NOT the idx vector
+% Report the centres, but NOT the idx vector
+c1 = centres(1, :)'
+c2 = centres(2, :)'
 
 projCentres = centres * prinComps;
 
