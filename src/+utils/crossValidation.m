@@ -1,6 +1,4 @@
 function [bestParams, minError] = crossValidation(data, folds, params, fun)
-    % addpath to the libsvm toolbox
-    % addpath(libsvmpath);
 
     data = sortrows(data, size(data, 2));
     K = cell(folds, 1);
