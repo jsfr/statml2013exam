@@ -17,7 +17,7 @@ testError1 = sum(testData(:, end) ~= C2) / length(C2)
 fprintf('## Nonlinear classification ##\n');
 knnClassify = @(param, tData, hData) utils.kNN(tData, hData(:, 1:end-1), param);
 
-[bestK, minError] = utils.crossValidation(trainData, 5, (1:25)', knnClassify)
+[bestK, minError] = utils.crossValidation(trainData, 5, (1:2:120)', knnClassify)
 
 C3 = utils.kNN(trainData, trainData(:, 1:end-1), bestK);
 C4 = utils.kNN(trainData, testData(:, 1:end-1), bestK);

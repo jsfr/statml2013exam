@@ -20,12 +20,8 @@
 \usepackage{subcaption}
 \usepackage[noabbrev]{cleveref}
 \usepackage{booktabs}
+\usepackage{xfrac}
 % \usepackage[parfill]{parskip}
-
-% \usepackage[colorinlistoftodos]{todonotes}
-% \usepackage{xfrac}
-% \usepackage{array}
-% \usepackage{booktabs}
 
 \linespread{1.05}
 \pagestyle{fancyplain}
@@ -67,7 +63,7 @@
 \label{sec:predicting_the_specific_star_formation_rate}
 
 \subsection*{Question 1}
-For the this question a maximum likelihood linear regression has been used. This means the basis functions used were linear such that $\phi_j(\mathbf{x}) = x_j$, except for the first function which were $\phi_0(\mathbf{x}) = 1$, as this is a dummy function to allow a bias. When applying the maximum likelihood method\footnote{This is simply using $\mathbf{w}_{\mathit{ML}} = \bm\Phi^\dagger t$, where $\bm\Phi^\dagger$ is the Moore-Penrose pseudo-inverse of $\bm\Phi$ and $t$ is the target of our data.} using a classic design matrix $\bm\Phi$ constructed from the basis functions and the data from the training set, I got a weight vector
+For this question a maximum likelihood linear regression has been used. This means the basis functions used were linear such that $\phi_j(\mathbf{x}) = x_j$, except for the first function which were $\phi_0(\mathbf{x}) = 1$, as this is a dummy function to allow a bias. When applying the maximum likelihood method\footnote{This is simply using $\mathbf{w}_{\mathit{ML}} = \bm\Phi^\dagger t$, where $\bm\Phi^\dagger$ is the Moore-Penrose pseudo-inverse of $\bm\Phi$ and $t$ is the target of our data.} using a classic design matrix $\bm\Phi$ constructed from the basis functions and the data from the training set, I got a weight vector
 \[
     \mathbf{w}_{\mathit{ML}} = \begin{pmatrix}
       -8.1494 \\
@@ -85,28 +81,67 @@ which when applied to the data gave mean squared errors of
 \end{align*}
 
 The error of the two sets is almost equal, which suggests that we probably have not over-fitted to the training data. Furthermore the error is reasonably small, leading to the conclusion that a linear model, might be a good choice of model for our data.
-% TODO Possibly extend with a paragraph about not having done sufficient validation to ensure linear is a good model
 
 The source code used in the implementation of this question can be found in \texttt{question1.m}, \texttt{linearRegression.m} and \texttt{meanSquaredError.m}.
 
-\subsection*{Question 2} % FIXME This question has NOT been answered yet
-\begin{comment} % REMOVE THIS WHEN READY
+\subsection*{Question 2}
+For the non-linear regression I initially decided to perform a maximum likelihood polynomial regression. However as the results left a lot to be desired, I also trained a feed-forward neural network, using resilient back-propagation.
+
+The maximum likelihood polynomial regression was implemented in the following way. As in the linear case I created a design matrix $\bm\Phi$. The basis functions however were defined as
+\[
+    \phi_j(\mathbf{x}) = \sum_{i=1}^{n-1} x_i^j, \quad
+    \mathbf{x} = \begin{pmatrix}
+        x_1 \\ x_2 \\ \vdots \\ x_n
+    \end{pmatrix} \; \wedge \; 0 < j \le m
+\]
+were $m$ is the size of the polynomial and $\mathbf{x}$ is a data point of $n$ dimensions, including the target as the $n$th dimension. As in the linear case to allow a bias the first basis funtion $\phi_0(\mathbf{x}) = 1$. Using these I created the classic design matrix
+\[
+    \bm\Phi = \begin{pmatrix}
+        \phi_0(\mathbf{x}_1) & \phi_1(\mathbf{x}_1) & \cdots & \phi_m(\mathbf{x}_1) \\
+        \phi_0(\mathbf{x}_2) & \phi_1(\mathbf{x}_2) & \cdots & \phi_m(\mathbf{x}_2) \\
+        \vdots & & & \vdots \\
+        \phi_0(\mathbf{x}_N) & \phi_1(\mathbf{x}_N) & \cdots & \phi_m(\mathbf{x}_N)
+    \end{pmatrix}
+\]
+and applied the maximum likelihood method as in the linear case, using the Moore-Penrose pseudo-inverse. However in this case there was a hyper parameter to tweak as I had to decide the degree of the polynomial. Thus the weights were found for polynomials of degree 1 to 15 and the mean squared error on these were found on the training and test data. The resulting plot can be seen in \Cref{fig:question2_1}.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/question2}
-    \caption{Here be dragons.}\label{fig:question2}
+    \includegraphics[width=0.5\textwidth]{figures/question2_1}
+    \caption{The degree of the polynomium plotted against the mean squared error obtained on the training and test data.}\label{fig:question2_1}
 \end{figure}
 
-degree of polynimium = 3
+As can be seen in \Cref{fig:question2_1} the error of the test set started to diverge from the training data at a degree of 3. However as the hyper parameters should be chosen only based on the training data I chose a polynomial of degree 12 as this is the minimum of the training error. With a polynomial of degree 12 I got errors of
 \begin{align*}
-    \mathrm{MSE}_{\mathit{train}} &= 0.25635 \\
-    \mathrm{MSE}_{\mathit{test}} &= 0.25835
+    MSE_{\mathit{train}} &= 0.17507 \\
+    MSE_{\mathit{test}} &= 258.02
 \end{align*}
 
-Notes: we could also do regularisation, and/or radial/polynomial basis functions.
+It is clear from the big difference in error that the model have over-fitted to the training data. Furthermore when looking at any degree larger than 12 the error starts to rise exponentially (thus the need for a logarithmic scale on the y-axis) in both the test and training data. A proper polynomial regression should in theory fit better and better to the training data, and when the polynomial reached a degree corresponding to the number of data points an error of 0 should be possible. Thus the results leaves me to conclude that not only  is this model probably not a good choice for the data, it also does not seem to be a proper polynomial regression, at least not in the classic sense.
+
+To try and achieve better general performance regularisation could have been used. Another alternative would be to use other basis functions like `Gaussian' or sigmoidal basis functions. The regularisation I decided not to do as the polynomial regression seemed to be wrong, thus I decided the time would be better spent on trying out a neural network instead. I decided against trying other basis functions, as we during the lectures have not seen examples of using these with more than one dimension in the input\footnote{This actually also applies to the polynomial basis functions, and maybe I should have decided against trying to model them on that basis alone.}.
+
+Because of the result of the maximum likelihood polynomial regression I also tried a feed-forward neural network. The implementation widely uses MATLABs neural network toolbox. The network created uses a standard hyperbolic tangent sigmoid function as the activation function for the hidden layer, a linear transfer function for the output neuron, and a single hidden layer with 1 to 100 neurons. To train the network the implementation uses resilient back-propagation.
+
+Most of the the standard settings for the network were kept, but for the training of the network the training data is split so 70\% is used for training, 15\% for validation and 15\% for test.
+
+The error when applying the trained network on training and test data can be seen in \Cref{fig:question2_2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/question2_2}
+    \caption{The number of hidden neurons plotted against the mean squared error obtained on the training and test data. As can be seen the error fluctuates a lot.}\label{fig:question2_2}
+\end{figure}
+
+As can be seen the error fluctuated a lot, but most of the time it kept below 0.2 for both of the data sets, which is better than the linear model in question 1. The number of neurons which gave the lowest training error was 93 hidden neurons. 93 hidden neurons gave errors of
+\begin{align*}
+    MSE_{\mathit{train}} &= 0.10871 \\
+    MSE_{\mathit{test}} &= 0.13374
+\end{align*}
+
+Both of these errors are small and close enough that it does not look like we have overfitted to the training set. We might therefore expect that the model will perform well in general on this type of data.
 
 The source code used in the implementation of this question can be found in \texttt{question2.m}, \texttt{polyRegression.m}, \texttt{polyPredict.m}, \texttt{meanSquaredError.m} and \texttt{betterPlots.m}.
-\end{comment} % REMOVE THIS WHEN READY
 
 % section predicting_the_specific_star_formation_rate (end)
 
@@ -114,7 +149,7 @@ The source code used in the implementation of this question can be found in \tex
 \label{sec:stars_vs_galaxies}
 
 \subsection*{Question 3}
-I have made use of the \texttt{libsvm-3.17}\footnote{http://www.csie.ntu.edu.tw/\textasciitilde{}cjlin/libsvm/} to perform the standard C-SVM binary classification.
+I have made use of the \texttt{libsvm-3.17}\footnote{http://www.csie.ntu.edu.tw/\textasciitilde{}cjlin/libsvm/} library to perform the standard C-SVM binary classification.
 
 Using the described Jaakkola's heuristic I calculated the initial value for $\sigma$ and afterwards for $\gamma$, using the identity
 \[
@@ -149,17 +184,18 @@ The source code used in the implementation of this question can be found in \tex
 \subsection*{Question 4}
 To perform the PCA I have not used any libraries (e.g.\ the built in MATLAB function \texttt{pca}). The analysis was performed by first computing the covariance matrix of the data, and then the eigenvectors and -values by using. Both of these computations can be done with built in functions \texttt{cov} and \texttt{eig} of MATLAB\@. Afterwards I simply sorted the eigenvectors, by their eigenvalue. The corresponding eigenspectrum can be seen in \Cref{fig:question4_1}. As can be seen almost all of the variance is caught by the first two principal components. 
 
-\begin{figure}[H] % TODO add proper captions
+\begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[t]{0.48\textwidth}
     \includegraphics[width=\textwidth]{figures/question4_1}
-        \caption{Here be dragons.}\label{fig:question4_1}
+        \caption{The eigenspectrum of the training data.}\label{fig:question4_1}
     \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
+    \hspace{0.5em}
+    \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/question4_2}
-        \caption{Here be dragons.}\label{fig:question4_2}
+        \caption{The training data projected on the first two principal components.}\label{fig:question4_2}
     \end{subfigure}
-    \caption{Here be dragons}\label{fig:question4}
+    \caption{Plots related to the PCA performed on the training data.}\label{fig:question4}
 \end{figure}
 
 In \Cref{fig:question4_2} the data points have been plotted after being projected on the first two principal components. As can be seen we do get a split of the two classes. However many star-class data points lie inside the galaxy-class. So while the the projection does provide at decent split, it is by no means perfect, and without the colouring of classes on might have thought the classes were divided by a horizontal line at around 62.5, as there is what seems to be a hole between two groups of points there.
@@ -186,27 +222,26 @@ To perform the 2-means clustering I have used the built in MATLAB function \text
         psfModelMag\_i & 17.880 & 20.272 \\
         psfModelMag\_z & 17.647 & 19.855 \bottomrule
     \end{tabular}
-    \caption{Here be dragons.}\label{tab:question4}
+    \caption{The two 10-dimensional class centres found using 2-means clustering.}\label{tab:question4}
 \end{table}
 
 When projecting these on the first two principal components of the data its look as in \Cref{fig:question5}, where \Cref{fig:question5_1} shows the classes as guessed by the 2-means clustering and \Cref{fig:question5_2} shows the actual classes.
 
-\begin{figure}[H] % TODO add proper captions
+\begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[t]{0.48\textwidth}
     \includegraphics[width=\textwidth]{figures/question5_1}
-        \caption{Here be dragons.}\label{fig:question5_1}
+        \caption{The projected training data and centres. Here the class colouring shows the classes as guessed by the 2-means clustering.}\label{fig:question5_1}
     \end{subfigure}
-    \begin{subfigure}[b]{0.49\textwidth}
+    \hspace{0.5em}
+    \begin{subfigure}[t]{0.48\textwidth}
         \includegraphics[width=\textwidth]{figures/question5_2}
-        \caption{Here be dragons.}\label{fig:question5_2}
+        \caption{The projected training data and centres. Here the class colouring shows the actual classes of the training data.}\label{fig:question5_2}
     \end{subfigure}
-    \caption{Here be dragons.}\label{fig:question5}
+    \caption{The projected training data and centres, show with the guessed and classes classes.}\label{fig:question5}
 \end{figure}
 
 As can be seen the 2-means clustering did not find the correct split of the two classes. The split found however makes sense, as the galaxy-class seems to be split in two clusters, with the star-class lying above. Thus it makes sense that the split was performed as seen in \Cref{fig:question5}. In general the problem with the two classes is that one is very spread out on the first axis and lies just up to the second class which lies in two compact clusters. There clusters could therefore still be seen as meaningful, as they do represent some sort of split which seem to be present in the data, but they do not represent the split between the star- and galaxy-class very well.
-
-% TODO Possibly add something about that we only see two pcs of the clusters so that the might actually be better, but that we have also looked at 3d which clearly shows that the clusters found are the two galxy-class clusters.
 
 The source code used in the implementation of this question can be found in \texttt{question5.m} and \texttt{betterPlots.m}. Note that \texttt{question5.m} depends on \texttt{question4.m} and thus it is necessary to run this script beforehand. If the the questions are not run one at a time, but using the main script \texttt{main.m} this is already taken care of.
 
@@ -217,28 +252,60 @@ The source code used in the implementation of this question can be found in \tex
 \section{Variable Stars} % (fold)
 \label{sec:variable_stars}
 
-\subsection*{Question 7} % FIXME This has not been done yet!
+\subsection*{Question 7}
 
-Linear classification
+For the linear classification I decided to use linear discriminant analysis (LDA) and for the non-linear classification I used k-nearest neighbour (KNN).
+
+I chose the LDA for the linear classification as it is simple to implement, and if there is a good linear split of the data the LDA normally performs well, as it splits using a hyperplane. Thus this seemed as a good choice for the linear classification. Furthermore LDA has no hyper parameters, so we avoid having to find these.
+
+The KNN was chosen again firstly because the algorithm and implementation is simple. More advanced methods, e.g.\ random forests, could have been used. However this would have required significantly more time to implements as both the algorithm and required data structure is more complex. Another possibility could have been to use SVMs. We have however not covered any type of multi-class SVMs in the lectures.
+
+To avoid having to train the LDA every time I wish to predict a point, the LDA is implemented such that it first takes the training set and then returns a function, which can predicts points using the trained model.
+
+Running the LDA on gave errors (0--1 loss) of
 \begin{align*}
-    E_{\mathit{train}} &= 0.18418 \\
-    E_{\mathit{test}} &= 0.28664
+    E_{\mathit{train}} &= 0.18418 = 18.418 \% \\
+    E_{\mathit{test}} &= 0.28664 = 28.664 \%
 \end{align*}
+both of which are relatively high.
 
-Nonlinear classification
+For the KNN I used the cross-validation function\footnote{It has been implemented such that it can take different models to cross-validate on, as long as it is a classification problem, as the function uses a 0--1 loss as error function. This could also have been generalised to take any error function, but has not been done.}, which I also used in question 3, to decide which $k$ to use. The cross validation was done as a 5-fold and with\footnote{This denotes all uneven integers from 1 to 120.}
 \[
-    k_{\mathit{best}} = 6
+k \in \lbrace 1 \le 2n-1 \le 120 | n \in \mathbb{Z} \rbrace
 \]
+Using the cross-validation (as always we train using only the training data) $k$ was found to be
+\[
+    k = 5
+\]
+which when used with a KNN trained on the training data gave errors (0--1 loss) of
 \begin{align*}
-    E_{\mathit{train}} &= 0.44877 \\
-    E_{\mathit{test}} &= 0.55512
+    E_{\mathit{train}} &= 0.42283 = 42.283 \% \\
+    E_{\mathit{test}} &= 0.55512 = 55.512 \%
 \end{align*}
+both of which are very high.
 
-Notes: used LDA and KNN\@. KNN used 5-fold cross-val to choose K
+Neither the LDA or the KNN gave very good results. With the LDA approximately \sfrac{1}{5} of all training data and \sfrac{1}{3} of all test data was misclassified. For the KNN the result were even worse, with a little under half of the training data and a little over half of the test data being misclassified.
+
+As can be seen neither of the two models gave very good results. Based of the results my conclusion would be to either try different models, or to go with the linear model (LDA) as that gave the best results.
 
 The source code used in the implementation of this question can be found in \texttt{question7.m}, \texttt{trainLDA.m}, \texttt{kNN.m} and \texttt{crossValidation.m}.
 
 \subsection*{Question 8} %FIXME This has not been done yet!
+
+\paragraph{Traditional over-fitting} % (fold)
+\label{par:traditional_over_fitting}
+
+% paragraph traditional_over_fitting (end)
+
+\paragraph{Brittle measure} % (fold)
+\label{par:brittle_measure}
+
+% paragraph brittle_measure (end)
+
+\paragraph{Human-loop over-fitting} % (fold)
+\label{par:human_loop_over_fitting}
+
+% paragraph human_loop_over_fitting (end)
 
 % section variable_stars (end)
 \end{document}
