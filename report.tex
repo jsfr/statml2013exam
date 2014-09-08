@@ -21,6 +21,7 @@
 \usepackage[noabbrev]{cleveref}
 \usepackage{booktabs}
 \usepackage{xfrac}
+\usepackage{algorithm, algpseudocode}
 % \usepackage[parfill]{parskip}
 
 \linespread{1.05}
@@ -103,7 +104,7 @@ and applied the maximum likelihood method as in the linear case, using the Moore
     \caption{The degree of the polynomium plotted against the mean squared error obtained on the training and test data.}\label{fig:question2_1}
 \end{figure}
 
-As can be seen in \Cref{fig:question2_1} the error of the test set started to diverge from the training data at a degree of 3. However as the hyper parameters should be chosen only based on the training data I chose a polynomial of degree 12 as this is the minimum of the training error. With a polynomial of degree 12 I got errors of
+As can be seen in \Cref{fig:question2_1} the error of the test set started to diverge from the training data at a degree of 3. However as the hyper parameters should be chosen only based on the training data I chose a polynomial of degree 12 as this is the minimum of the training error. With a polynomial of degree 12, I got errors of
 \begin{align*}
     MSE_{\mathit{train}} &= 0.17507 \\
     MSE_{\mathit{test}} &= 258.02
@@ -111,7 +112,7 @@ As can be seen in \Cref{fig:question2_1} the error of the test set started to di
 
 It is clear from the big difference in error that the model have over-fitted to the training data. Furthermore when looking at any degree larger than 12 the error starts to rise exponentially (thus the need for a logarithmic scale on the y-axis) in both the test and training data. A proper polynomial regression should in theory fit better and better to the training data, and when the polynomial reached a degree corresponding to the number of data points an error of 0 should be possible. Thus the results leaves me to conclude that not only  is this model probably not a good choice for the data, it also does not seem to be a proper polynomial regression, at least not in the classic sense.
 
-To try and achieve better general performance regularisation could have been used. Another alternative would be to use other basis functions like `Gaussian' or sigmoidal basis functions. The regularisation I decided not to do as the polynomial regression seemed to be wrong, thus I decided the time would be better spent on trying out a neural network instead. I decided against trying other basis functions, as we during the lectures have not seen examples of using these with more than one dimension in the input space\footnote{This actually also applies to the polynomial basis functions, and maybe I should have decided against trying to model them on that basis alone.}.
+To try and achieve better general performance, regularisation could have been used. Another alternative would be to use other basis functions like `Gaussian' or sigmoidal basis functions. The regularisation I decided not to do as the polynomial regression seemed to be wrong, thus I decided the time would be better spent on trying out a neural network instead. I decided against trying other basis functions, as we during the lectures have not seen examples of using these with more than one dimension in the input space\footnote{This actually also applies to the polynomial basis functions, and maybe I should have decided against trying to model them on that basis alone.}.
 
 Because of the result of the maximum likelihood polynomial regression I also tried a feed-forward neural network. The implementation widely uses MATLABs neural network toolbox. The network created uses a standard hyperbolic tangent sigmoid function as the activation function for the hidden layer, a linear transfer function for the output neuron, and a single hidden layer with 1 to 100 neurons. To train the network the implementation uses resilient back-propagation.
 
@@ -153,11 +154,11 @@ The initial values suggested by the heuristic was
     \sigma_{\mathit{jaakkola}} = 1.8119,\quad \gamma_{\mathit{jaakkola}} = 0.1523
 \]
 
-Using these I performed a grid search to determine the appropriate hyper parameters for the SVM\@. The grid search was set up such that all the given combinations was tried, for each of the three given bases. That I tried every combination of the type
+Using these I performed a grid search to determine the appropriate hyper parameters for the SVM\@. The grid search was set up such that all the given combinations was tried, for each of the three given bases. I tried every combination of the type
 \[
     \lbrace C \times \gamma \rbrace \in \lbrace b^i \times \gamma_{\mathit{jaakkola}} \cdot b^j | -2 \le i \le 3 \wedge -3 \le j \le 3 \wedge b \in \lbrace 2, e, 10 \rbrace \rbrace
 \]
-On every combination 5-fold cross validation was performed, and the one with the lowest average 0--1 loss was then chosen to be the best hyper parameters. The cross validation splits the data into the five folds by sorting the data on class and then evenly distributing the using modulo (such that every fold gets one of the first five data points, one of the five next, and so on). This is done to ensure that every fold is representative of the entire data set.
+On every combination 5-fold cross validation was performed, and the one with the lowest average 0--1 loss was then chosen to be the best hyper parameters. The cross validation splits the data into the five folds by sorting the data on class and then evenly distributing the classes using modulo (such that every fold gets one of the first five data points, one of the five next, and so on). This is done to ensure that every fold is representative of the entire data set.
 
 Using this method the hyper parameters was found to be
 \[
@@ -174,7 +175,7 @@ These hyper parameters and the training data were then used to train the SVM\@. 
 The source code used in the implementation of this question can be found in \texttt{question3.m}, \texttt{jaakkola.m}, \texttt{crossValidation.m} and \texttt{svmClassify.m}.
 
 \subsection*{Question 4}
-To perform the PCA I have not used any libraries (e.g.\ the built in MATLAB function \texttt{pca}). The analysis was performed by first computing the covariance matrix of the data, and then the eigenvectors and -values by using. Both of these computations can be done with built in functions \texttt{cov} and \texttt{eig} of MATLAB\@. Afterwards I simply sorted the eigenvectors, by their eigenvalue. The corresponding eigenspectrum can be seen in \Cref{fig:question4_1}. As can be seen almost all of the variance is caught by the first two principal components. 
+To perform the PCA I have not used any libraries (e.g.\ the built in MATLAB function \texttt{pca}). The analysis was performed by first computing the covariance matrix of the data, and then the eigenvectors and -values. Both of these computations can be done with built in functions \texttt{cov} and \texttt{eig} of MATLAB\@. Afterwards I simply sorted the eigenvectors, by their eigenvalue. The corresponding eigenspectrum can be seen in \Cref{fig:question4_1}. As can be seen almost all of the variance is caught by the first two principal components. 
 
 \begin{figure}[H]
     \centering
@@ -230,14 +231,79 @@ When projecting these on the first two principal components of the data its look
         \includegraphics[width=\textwidth]{figures/question5_2}
         \caption{The projected training data and centres. Here the class colouring shows the actual classes of the training data.}\label{fig:question5_2}
     \end{subfigure}
-    \caption{The projected training data and centres, show with the guessed and classes classes.}\label{fig:question5}
+    \caption{The projected training data and centres, shown with the guessed and classes classes.}\label{fig:question5}
 \end{figure}
 
-As can be seen the 2-means clustering did not find the correct split of the two classes. The split found however makes sense, as the galaxy-class seems to be split in two clusters, with the star-class lying above. Thus it makes sense that the split was performed as seen in \Cref{fig:question5}. In general the problem with the two classes is that one is very spread out on the first axis and lies just up to the second class which lies in two compact clusters. There clusters could therefore still be seen as meaningful, as they do represent some sort of split which seem to be present in the data, but they do not represent the split between the star- and galaxy-class very well.
+As can be seen the 2-means clustering did not find the correct split of the two classes. The split found however makes sense, as the galaxy-class seems to be split in two clusters, with the star-class lying above. Thus it makes sense that the split was performed as seen in \Cref{fig:question5}. In general the problem with the two classes is that one is very spread out on the first axis and lies just up to the second class which lies in two compact clusters. The clusters could therefore still be seen as meaningful, as they do represent some sort of split which seem to be present in the data, but they do not represent the split between the star- and galaxy-class very well.
 
 The source code used in the implementation of this question can be found in \texttt{question5.m} and \texttt{betterPlots.m}. Note that \texttt{question5.m} depends on \texttt{question4.m} and thus it is necessary to run this script beforehand. If the the questions are not run one at a time, but using the main script \texttt{main.m} this is already taken care of.
 
-\subsection*{Question 6} %FIXME This has not been done yet!
+\subsection*{Question 6}
+We wish to define a nearest mean classifier in the reproducing kernel Hilbert space.
+
+We firstly look at how the distance between two vectors $\mathbf{x}$ and $\mathbf{z}$ is defined in the feature space. The euclidean distance is calculated as
+\[
+    || \mathbf{x} - \mathbf{z} || = \sqrt{{(\mathbf{x} - \mathbf{z})}^T (\mathbf{x} - \mathbf{z})}
+\]
+which in the feature space means we have
+\begin{align*}
+    || \bm\phi(\mathbf{x}) - \bm\phi(\mathbf{z}) ||
+    &= \sqrt{{(\bm\phi(\mathbf{x}) - \bm\phi(\mathbf{z}))}^T (\bm\phi(\mathbf{x}) - \bm\phi(\mathbf{z}))} \\
+    &= \sqrt{{\bm\phi(\mathbf{x})}^T \bm\phi(\mathbf{x}) + {\bm\phi(\mathbf{z})}^T \bm\phi(\mathbf{z}) - {\bm\phi(\mathbf{x})}^T \bm\phi(\mathbf{z}) - {\bm\phi(\mathbf{z})}^T \bm\phi(\mathbf{x})} \\
+    &= \sqrt{{\bm\phi(\mathbf{x})}^T \bm\phi(\mathbf{x}) + {\bm\phi(\mathbf{z})}^T \bm\phi(\mathbf{z}) - 2 {\bm\phi(\mathbf{x})}^T \bm\phi(\mathbf{z})} \\
+    &= \sqrt{k(\mathbf{x}, \mathbf{x}) + k(\mathbf{z}, \mathbf{z}) - 2 k(\mathbf{x}, \mathbf{z})}
+\end{align*}
+
+We now look at how the mean of a class is defined in feature space. The mean of a class is calculated as
+\[
+    \bm\mu(\mathbf{X}_c) = \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} \mathbf{x}_i
+\]
+where $|\mathbf{X}_c|$ is the number of observations belonging to class $c$, and $\mathbf{x}_i$ is the $i$th observation belonging to class $c$. This can in feature space be expressed as
+\begin{align*}
+    \bm\phi(\bm\mu(\mathbf{X}_c))
+    &= \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_i)
+\end{align*}
+
+We now calculate the kernel on $k(\bm\mu(\mathbf{X}_c), \bm\mu(\mathbf{X}_c))$ and $k(\mathbf{x}, \bm\mu(\mathbf{X}_c))$ as we will need these shortly. Thus
+\begin{align*}
+    k(\bm\mu(\mathbf{X}_c), \bm\mu(\mathbf{X}_c))
+    &= {\bm\phi(\bm\mu(\mathbf{X}_c))}^T \bm\phi(\bm\mu(\mathbf{X}_c)) \\
+    &= {\left( \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_i) \right)}^T \left( \frac{1}{|\mathbf{X}_c|} \sum_{j=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_j) \right) \\
+    &= \frac{1}{|\mathbf{X}_c|^2} {\left( \sum_{i=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_i) \right)}^T \left( \sum_{j=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_j) \right) \\
+    &= \frac{1}{|\mathbf{X}_c|^2} \sum_{i=1}^{|\mathbf{X}_c|}\sum_{j=1}^{|\mathbf{X}_c|} {\bm\phi(\mathbf{x}_i)}^T \bm\phi(\mathbf{x}_j) \\
+    &= \frac{1}{|\mathbf{X}_c|^2} \sum_{i=1}^{|\mathbf{X}_c|}\sum_{j=1}^{|\mathbf{X}_c|} k(\mathbf{x}_i, \mathbf{x}_j) \\
+    k(\mathbf{x}, \bm\mu(\mathbf{X}_c))
+    &= {\bm\phi(\mathbf{x})}^T \bm\phi(\bm\mu(\mathbf{X}_c)) \\
+    &= {\bm\phi(\mathbf{x})}^T \left( \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} \bm\phi(\mathbf{x}_i) \right) \\
+    &= \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} {\bm\phi(\mathbf{x})}^T \bm\phi(\mathbf{x}_i) \\
+    &= \frac{1}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} k(\mathbf{x},\mathbf{x}_i)
+\end{align*}
+
+We can now use the distance in feature space as we found it before, to calculate the distance between a point and the mean of a class
+\begin{align*}
+    || \bm\phi(\mathbf{x}) - \bm\phi(\bm\mu(\mathbf{X}_c)) ||
+    &= \sqrt{k(\mathbf{x}, \mathbf{x}) + k(\bm\mu(\mathbf{X}_c), \bm\mu(\mathbf{X}_c)) - 2 k(\mathbf{x}, \bm\mu(\mathbf{X}_c))} \\
+    &= \sqrt{k(\mathbf{x}, \mathbf{x}) + \frac{1}{|\mathbf{X}_c|^2} \sum_{i=1}^{|\mathbf{X}_c|}\sum_{j=1}^{|\mathbf{X}_c|} k(\mathbf{x}_i, \mathbf{x}_j) + \frac{2}{|\mathbf{X}_c|} \sum_{i=1}^{|\mathbf{X}_c|} k(\mathbf{x},\mathbf{x}_i)}
+\end{align*}
+
+Thus we have now defined the distance to a class mean in the feature space, and the overall algorithm will then be as in \Cref{alg:classmean}.
+
+\begin{algorithm}[H]
+\caption{A general algorithm for using the nearest mean classifier.}
+\label{alg:classmean}
+\begin{algorithmic}[1]
+    \State{Let $\mathbf{X}=\{ x_1, x_2, \ldots, x_{n} \}$ be the training data points and $\mathbf{Y}=\{ y_1, y_2, \ldots, y_{n'} \}$ be the test data points.}
+    \ForAll{$c \in \mathcal{C}$}
+        \State{$m[c] \gets k(\bm\mu(\mathbf{X}_c), \bm\mu(\mathbf{X}_c))$}
+    \EndFor{}
+    \ForAll{$\mathbf{y} \in \mathbf{Y}$}
+        \ForAll{$c \in \mathcal{C}$}
+            \State{$d[c] \gets \sqrt{k(\mathbf{y}, \mathbf{y}) + m[c] - 2 k(\mathbf{x}, \bm\mu(\mathbf{X}_c))}$}
+        \EndFor{}
+        \State{assign $\mathbf{y}$ to the class with the minimum $d$}
+    \EndFor{}
+\end{algorithmic}
+\end{algorithm}
 
 % section stars_vs_galaxies (end)
 
@@ -278,7 +344,7 @@ both of which are very high.
 
 Neither the LDA or the KNN gave very good results. With the LDA approximately \sfrac{1}{5} of all training data and \sfrac{1}{3} of all test data was misclassified. For the KNN the result were even worse, with a little under half of the training data and a little over half of the test data being misclassified.
 
-As can be seen neither of the two models gave very good results. Based of the results my conclusion would be to either try different models, or to go with the linear model (LDA) as that gave the best results.
+As can be seen neither of the two models gave very good results. Based of the results, my conclusion would be to either try different models, or to go with the linear model (LDA) as that gave the best results.
 
 The source code used in the implementation of this question can be found in \texttt{question7.m}, \texttt{trainLDA.m}, \texttt{kNN.m} and \texttt{crossValidation.m}.
 
@@ -298,7 +364,7 @@ A way to remedy this could be to reduce the number of dimensions before we apply
 
 This can easily happen on the variable star classification data set as it is obvious to choose cross-validation when training the KNN algorithm. This becomes especially bad if we choose to small sets (a high number of folds) giving a very small validation set. As we only have 771 data points in the training data set, choosing something as e.g.\ 200-fold cross-validation would probably give to small sets. Furthermore the cross-validation method assumes that the samples are independent, which depending of how they are drawn, and the data, can be hard to guarantee.
 
-The ways to remedy this is first of to use smaller number of folds, e.g.\ 5, and to split the data into folds so that the folds are representative of the data. This can e.g.\ be done by sorting the data on the class and then spreading the classes equally on the folds\footnote{This is not necessarily enough to guarantee that the folds are representive, especially since we have 61 input dimensions, meaning that these might also have to be evenly distributed in some way.}. In the cross-validation I use 5 folds, and the cross-validation distributes the classes evenly on the folds.
+The ways to remedy this is first of to use smaller number of folds, e.g.\ 5, and to split the data into folds so that the folds are representative of the data. This can e.g.\ be done by sorting the data on the class and then spreading the classes equally on the folds\footnote{This is not necessarily enough to guarantee that the folds are representative, especially since we have 61 input dimensions, meaning that these might also have to be evenly distributed in some way.}. In the cross-validation I use 5 folds, and the cross-validation distributes the classes evenly on the folds.
 
 % paragraph brittle_measure (end)
 
